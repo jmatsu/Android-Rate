@@ -39,7 +39,7 @@ jobs:
       - checkout
       - restore_gradle_cache
       - run:
-          name: Assemble DeployGate app
+          name: Run gradle tasks
           command: >
             ./gradlew
             :library:assembleRelease
