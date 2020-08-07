@@ -18,6 +18,12 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 kotlin.sourceSets.all {
@@ -28,6 +34,18 @@ kotlin.sourceSets.all {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    testImplementation "androidx.test:core:1.2.0"
+    testImplementation "androidx.test.ext:truth:1.2.0"
+
+    testImplementation "org.robolectric:robolectric:4.3.1"
+
+    testImplementation "org.jetbrains.kotlin:kotlin-test:${kotlin_version}"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:${kotlin_version}"
+    testImplementation "org.jetbrains.kotlin:kotlin-reflect:${kotlin_version}"
+
+    testImplementation "io.mockk:mockk:1.10.0"
+
 }
 
 apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'
