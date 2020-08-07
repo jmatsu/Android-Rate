@@ -17,6 +17,7 @@ internal object UriHelper {
 
     fun isPackageExists(context: Context, targetPackage: String): Boolean {
         val pm = context.packageManager
+        // FIXME use queries tag due to Android 11's package visibility changes
         val packages = pm.getInstalledApplications(0)
         for (packageInfo in packages) {
             if (packageInfo.packageName == targetPackage) return true
