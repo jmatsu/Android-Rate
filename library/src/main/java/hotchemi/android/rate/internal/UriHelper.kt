@@ -1,4 +1,4 @@
-package hotchemi.android.rate
+package hotchemi.android.rate.internal
 
 import android.content.Context
 import android.net.Uri

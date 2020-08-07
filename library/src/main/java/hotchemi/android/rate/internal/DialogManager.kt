@@ -1,7 +1,8 @@
-package hotchemi.android.rate
+package hotchemi.android.rate.internal
 
 import android.app.Dialog
 import android.content.Context
+import hotchemi.android.rate.StoreType
 
 internal object DialogManager {
     fun create(context: Context, options: DialogOptions): Dialog {

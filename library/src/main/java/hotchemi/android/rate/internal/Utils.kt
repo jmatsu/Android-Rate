@@ -1,9 +1,10 @@
-package hotchemi.android.rate
+package hotchemi.android.rate.internal
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.os.Build
+import hotchemi.android.rate.R
 
 internal object Utils {
     fun underHoneyComb(): Boolean {

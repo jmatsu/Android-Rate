@@ -3,6 +3,9 @@ package hotchemi.android.rate
 import android.app.Activity
 import android.content.Context
 import android.view.View
+import hotchemi.android.rate.internal.DialogManager
+import hotchemi.android.rate.internal.DialogOptions
+import hotchemi.android.rate.internal.PreferenceHelper
 import java.util.*
 
 class AppRate private constructor(context: Context) {

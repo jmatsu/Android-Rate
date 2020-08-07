@@ -3,8 +3,10 @@ package hotchemi.android.rate;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 
+import hotchemi.android.rate.internal.UriHelper;
+
 /**
- * Unit test for {@link hotchemi.android.rate.UriHelper}
+ * Unit test for {@link UriHelper}
  */
 public class UriHelperTest extends AndroidTestCase {
 
