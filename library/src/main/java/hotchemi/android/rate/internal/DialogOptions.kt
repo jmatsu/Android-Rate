@@ -2,7 +2,6 @@ package hotchemi.android.rate.internal
 
 import android.content.Context
 import android.view.View
-import hotchemi.android.rate.OnClickButtonListener
 import hotchemi.android.rate.R
 import hotchemi.android.rate.StoreType
 import java.lang.ref.Reference
