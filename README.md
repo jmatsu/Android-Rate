@@ -124,7 +124,7 @@ Android-Rate currently supports the following languages:
 
 ## Support
 
-Android-Rate supports API level 9 and up.
+Android-Rate supports API level 14 and up.
 
 ## Sample
 
