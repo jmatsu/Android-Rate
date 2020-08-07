@@ -1,4 +1,4 @@
-package hotchemi.android.rate
+package hotchemi.android.rate.internal
 
 import com.google.common.truth.Truth.assertThat
 import hotchemi.android.rate.internal.UriHelper
