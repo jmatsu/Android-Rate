@@ -10,21 +10,15 @@ import hotchemi.android.rate.internal.UriHelper;
  */
 public class UriHelperTest extends AndroidTestCase {
 
-    private static final String GOOGLE_PLAY = "https://play.google.com/store/apps/details?id=";
-
     public void testGetGooglePlayUri() {
         {
-            Uri uri = UriHelper.getGooglePlay("");
-            assertEquals(uri.toString(), GOOGLE_PLAY);
-        }
-        {
-            Uri uri = UriHelper.getGooglePlay(null);
-            assertNull(uri);
+            Uri uri = UriHelper.INSTANCE.getGooglePlay("");
+            assertEquals(uri.toString(), "https://play.google.com/store/apps/details?id=");
         }
         {
             final String packageName = "hotchemi.android.rate";
-            Uri uri = UriHelper.getGooglePlay(packageName);
-            assertEquals(uri.toString(), GOOGLE_PLAY + packageName);
+            Uri uri = UriHelper.INSTANCE.getGooglePlay(packageName);
+            assertEquals(uri.toString(), "https://play.google.com/store/apps/details?id=" + packageName);
         }
     }
 }

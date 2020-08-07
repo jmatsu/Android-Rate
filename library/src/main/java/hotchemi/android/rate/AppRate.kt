@@ -154,13 +154,13 @@ class AppRate private constructor(context: Context) {
     }
 
     private val isOverLaunchTimes: Boolean
-        private get() = PreferenceHelper.getLaunchTimes(context) >= launchTimes
+        get() = PreferenceHelper.getLaunchTimes(context) >= launchTimes
 
     private val isOverInstallDate: Boolean
-        private get() = isOverDate(PreferenceHelper.getInstallDate(context), installDate)
+        get() = isOverDate(PreferenceHelper.getInstallDate(context), installDate)
 
     private val isOverRemindDate: Boolean
-        private get() = isOverDate(PreferenceHelper.getRemindInterval(context), remindInterval)
+        get() = isOverDate(PreferenceHelper.getRemindInterval(context), remindInterval)
 
     fun setDebug(isDebug: Boolean): AppRate {
         this.isDebug = isDebug

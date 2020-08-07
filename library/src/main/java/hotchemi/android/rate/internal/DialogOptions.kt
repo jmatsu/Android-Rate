@@ -2,29 +2,36 @@ package hotchemi.android.rate.internal
 
 import android.content.Context
 import android.view.View
+import hotchemi.android.rate.OnClickButtonListener
 import hotchemi.android.rate.R
 import hotchemi.android.rate.StoreType
 import java.lang.ref.Reference
 import java.lang.ref.WeakReference
 
 internal class DialogOptions {
-    private var showNeutralButton = true
-    private var showNegativeButton = true
-    private var showTitle = true
-    var cancelable = false
-    var storeType = StoreType.GOOGLEPLAY
-    var titleResId = R.string.rate_dialog_title
-    var messageResId = R.string.rate_dialog_message
-    var textPositiveResId = R.string.rate_dialog_ok
-    var textNeutralResId = R.string.rate_dialog_cancel
-    var textNegativeResId = R.string.rate_dialog_no
+    private var showNeutralButton: Boolean = true
+    private var showNegativeButton: Boolean = true
+    private var showTitle: Boolean = true
+    var cancelable: Boolean = false
+    var storeType: StoreType = StoreType.GooglePlay
+
+    // todo annotation
+    var titleResId: Int = R.string.rate_dialog_title
+    var messageResId: Int = R.string.rate_dialog_message
+    var textPositiveResId: Int = R.string.rate_dialog_ok
+    var textNeutralResId: Int = R.string.rate_dialog_cancel
+    var textNegativeResId: Int = R.string.rate_dialog_no
+
     private var titleText: String? = null
     private var messageText: String? = null
     private var positiveText: String? = null
     private var neutralText: String? = null
     private var negativeText: String? = null
+
     var view: View? = null
+
     private var listener: Reference<OnClickButtonListener?>? = null
+
     fun shouldShowNeutralButton(): Boolean {
         return showNeutralButton
     }
@@ -49,9 +56,7 @@ internal class DialogOptions {
         this.showTitle = showTitle
     }
 
-    fun getListener(): OnClickButtonListener? {
-        return if (listener != null) listener!!.get() else null
-    }
+    fun getListener(): OnClickButtonListener? = listener?.get()
 
     fun setListener(listener: OnClickButtonListener?) {
         this.listener = WeakReference(listener)

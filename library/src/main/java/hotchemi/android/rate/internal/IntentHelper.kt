@@ -5,6 +5,7 @@ import android.content.Intent
 
 internal object IntentHelper {
     private const val GOOGLE_PLAY_PACKAGE_NAME = "com.android.vending"
+
     fun createIntentForGooglePlay(context: Context): Intent {
         val packageName = context.packageName
         val intent = Intent(Intent.ACTION_VIEW, UriHelper.getGooglePlay(packageName))

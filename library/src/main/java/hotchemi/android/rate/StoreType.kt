@@ -6,11 +6,11 @@ sealed class StoreType {
 
     companion object {
         @Deprecated("Use StoreType#GooglePlay instead", level = DeprecationLevel.WARNING, replaceWith = ReplaceWith("GooglePlay"))
-        @JvmStatic
+        @JvmField
         val GOOGLEPLAY = GooglePlay
 
         @Deprecated("Use StoreType#Amazon instead", level = DeprecationLevel.WARNING, replaceWith = ReplaceWith("Amazon"))
-        @JvmStatic
+        @JvmField
         val AMAZON = Amazon
     }
 }

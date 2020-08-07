@@ -10,12 +10,9 @@ internal object PreferenceHelper {
     private const val PREF_KEY_LAUNCH_TIMES = "android_rate_launch_times"
     private const val PREF_KEY_IS_AGREE_SHOW_DIALOG = "android_rate_is_agree_show_dialog"
     private const val PREF_KEY_REMIND_INTERVAL = "android_rate_remind_interval"
+
     fun getPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE)
-    }
-
-    fun getPreferencesEditor(context: Context): SharedPreferences.Editor {
-        return getPreferences(context).edit()
     }
 
     /**
@@ -24,10 +21,10 @@ internal object PreferenceHelper {
      * @param context context
      */
     fun clearSharedPreferences(context: Context) {
-        val editor = getPreferencesEditor(context)
-        editor.remove(PREF_KEY_INSTALL_DATE)
-        editor.remove(PREF_KEY_LAUNCH_TIMES)
-        editor.apply()
+        getPreferences(context).editAndApply {
+            remove(PREF_KEY_INSTALL_DATE)
+            remove(PREF_KEY_LAUNCH_TIMES)
+        }
     }
 
     /**
@@ -38,9 +35,9 @@ internal object PreferenceHelper {
      * @param isAgree agree with showing rate dialog
      */
     fun setAgreeShowDialog(context: Context, isAgree: Boolean) {
-        val editor = getPreferencesEditor(context)
-        editor.putBoolean(PREF_KEY_IS_AGREE_SHOW_DIALOG, isAgree)
-        editor.apply()
+        getPreferences(context).editAndApply {
+            putBoolean(PREF_KEY_IS_AGREE_SHOW_DIALOG, isAgree)
+        }
     }
 
     fun getIsAgreeShowDialog(context: Context): Boolean {
@@ -48,10 +45,10 @@ internal object PreferenceHelper {
     }
 
     fun setRemindInterval(context: Context) {
-        val editor = getPreferencesEditor(context)
-        editor.remove(PREF_KEY_REMIND_INTERVAL)
-        editor.putLong(PREF_KEY_REMIND_INTERVAL, Date().time)
-        editor.apply()
+        getPreferences(context).editAndApply {
+            remove(PREF_KEY_REMIND_INTERVAL)
+            putLong(PREF_KEY_REMIND_INTERVAL, Date().time)
+        }
     }
 
     fun getRemindInterval(context: Context): Long {
@@ -59,9 +56,9 @@ internal object PreferenceHelper {
     }
 
     fun setInstallDate(context: Context) {
-        val editor = getPreferencesEditor(context)
-        editor.putLong(PREF_KEY_INSTALL_DATE, Date().time)
-        editor.apply()
+        getPreferences(context).editAndApply {
+            putLong(PREF_KEY_INSTALL_DATE, Date().time)
+        }
     }
 
     fun getInstallDate(context: Context): Long {
@@ -69,9 +66,9 @@ internal object PreferenceHelper {
     }
 
     fun setLaunchTimes(context: Context, launchTimes: Int) {
-        val editor = getPreferencesEditor(context)
-        editor.putInt(PREF_KEY_LAUNCH_TIMES, launchTimes)
-        editor.apply()
+        getPreferences(context).editAndApply {
+            putInt(PREF_KEY_LAUNCH_TIMES, launchTimes)
+        }
     }
 
     fun getLaunchTimes(context: Context): Int {
@@ -80,5 +77,9 @@ internal object PreferenceHelper {
 
     fun isFirstLaunch(context: Context): Boolean {
         return getPreferences(context).getLong(PREF_KEY_INSTALL_DATE, 0) == 0L
+    }
+
+    private fun SharedPreferences.editAndApply(op: SharedPreferences.Editor.() -> Unit) {
+        edit().also(op).apply()
     }
 }

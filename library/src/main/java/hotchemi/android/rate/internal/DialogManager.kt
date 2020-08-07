@@ -6,31 +6,44 @@ import hotchemi.android.rate.StoreType
 
 internal object DialogManager {
     fun create(context: Context, options: DialogOptions): Dialog {
-        val builder = Utils.getDialogBuilder(context)
-        builder.setMessage(options.getMessageText(context))
-        if (options.shouldShowTitle()) builder.setTitle(options.getTitleText(context))
-        builder.setCancelable(options.cancelable)
-        val view = options.view
-        if (view != null) builder.setView(view)
-        val listener = options.getListener()
-        builder.setPositiveButton(options.getPositiveText(context)) { dialog, which ->
-            val intentToAppstore = if (options.storeType == StoreType.GOOGLEPLAY) IntentHelper.createIntentForGooglePlay(context) else IntentHelper.createIntentForAmazonAppstore(context)
-            context.startActivity(intentToAppstore)
-            PreferenceHelper.setAgreeShowDialog(context, false)
-            listener?.onClickButton(which)
-        }
-        if (options.shouldShowNeutralButton()) {
-            builder.setNeutralButton(options.getNeutralText(context)) { dialog, which ->
-                PreferenceHelper.setRemindInterval(context)
-                listener?.onClickButton(which)
+        return Utils.getDialogBuilder(context).apply {
+            setMessage(options.getMessageText(context))
+
+            if (options.shouldShowTitle()) {
+                setTitle(options.getTitleText(context))
             }
-        }
-        if (options.shouldShowNegativeButton()) {
-            builder.setNegativeButton(options.getNegativeText(context)) { dialog, which ->
+
+            setCancelable(options.cancelable)
+
+            options.view?.also { view ->
+                setView(view)
+            }
+
+            val listener = options.getListener()
+
+            setPositiveButton(options.getPositiveText(context)) { _, which ->
+                val intentToAppstore = when (options.storeType) {
+                    StoreType.GooglePlay -> IntentHelper.createIntentForGooglePlay(context)
+                    StoreType.Amazon -> IntentHelper.createIntentForAmazonAppstore(context)
+                }
+                context.startActivity(intentToAppstore)
                 PreferenceHelper.setAgreeShowDialog(context, false)
                 listener?.onClickButton(which)
             }
-        }
-        return builder.create()
+
+            if (options.shouldShowNeutralButton()) {
+                setNeutralButton(options.getNeutralText(context)) { _, which ->
+                    PreferenceHelper.setRemindInterval(context)
+                    listener?.onClickButton(which)
+                }
+            }
+
+            if (options.shouldShowNegativeButton()) {
+                setNegativeButton(options.getNegativeText(context)) { _, which ->
+                    PreferenceHelper.setAgreeShowDialog(context, false)
+                    listener?.onClickButton(which)
+                }
+            }
+        }.create()
     }
 }
