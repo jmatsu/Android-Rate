@@ -9,128 +9,106 @@ import hotchemi.android.rate.internal.PreferenceHelper
 import java.util.*
 
 class AppRate private constructor(context: Context) {
-    private val context: Context
+    private val context: Context = context.applicationContext
     private val options = DialogOptions()
-    private var installDate = 10
-    private var launchTimes = 10
-    private var remindInterval = 1
+    private var installDate: Long = 10
+    private var launchTimes: Int = 10
+    private var remindInterval: Long = 1
     var isDebug = false
         private set
 
-    fun setLaunchTimes(launchTimes: Int): AppRate {
+    fun setLaunchTimes(launchTimes: Int): AppRate = apply {
         this.launchTimes = launchTimes
-        return this
     }
 
-    fun setInstallDays(installDate: Int): AppRate {
+    fun setInstallDays(installDate: Long): AppRate = apply {
         this.installDate = installDate
-        return this
     }
 
-    fun setRemindInterval(remindInterval: Int): AppRate {
+    fun setRemindInterval(remindInterval: Long): AppRate = apply {
         this.remindInterval = remindInterval
-        return this
     }
 
-    fun setShowLaterButton(isShowNeutralButton: Boolean): AppRate {
+    fun setShowLaterButton(isShowNeutralButton: Boolean): AppRate = apply {
         options.setShowNeutralButton(isShowNeutralButton)
-        return this
     }
 
-    fun setShowNeverButton(isShowNeverButton: Boolean): AppRate {
+    fun setShowNeverButton(isShowNeverButton: Boolean): AppRate = apply {
         options.setShowNegativeButton(isShowNeverButton)
-        return this
     }
 
-    fun setShowTitle(isShowTitle: Boolean): AppRate {
+    fun setShowTitle(isShowTitle: Boolean): AppRate = apply {
         options.setShowTitle(isShowTitle)
-        return this
     }
 
-    fun clearAgreeShowDialog(): AppRate {
+    fun clearAgreeShowDialog(): AppRate = apply {
         PreferenceHelper.setAgreeShowDialog(context, true)
-        return this
     }
 
-    fun clearSettingsParam(): AppRate {
+    fun clearSettingsParam(): AppRate = apply {
         PreferenceHelper.setAgreeShowDialog(context, true)
         PreferenceHelper.clearSharedPreferences(context)
-        return this
     }
 
-    fun setAgreeShowDialog(clear: Boolean): AppRate {
+    fun setAgreeShowDialog(clear: Boolean): AppRate = apply {
         PreferenceHelper.setAgreeShowDialog(context, clear)
-        return this
     }
 
-    fun setView(view: View?): AppRate {
+    fun setView(view: View?): AppRate = apply {
         options.view = view
-        return this
     }
 
-    fun setOnClickButtonListener(listener: OnClickButtonListener?): AppRate {
+    fun setOnClickButtonListener(listener: OnClickButtonListener?): AppRate = apply {
         options.setListener(listener)
-        return this
     }
 
-    fun setTitle(resourceId: Int): AppRate {
+    fun setTitle(resourceId: Int): AppRate = apply {
         options.titleResId = resourceId
-        return this
     }
 
-    fun setTitle(title: String?): AppRate {
+    fun setTitle(title: String?): AppRate = apply {
         options.setTitleText(title)
         return this
     }
 
-    fun setMessage(resourceId: Int): AppRate {
+    fun setMessage(resourceId: Int): AppRate = apply {
         options.messageResId = resourceId
-        return this
     }
 
-    fun setMessage(message: String?): AppRate {
+    fun setMessage(message: String?): AppRate = apply {
         options.setMessageText(message)
-        return this
     }
 
-    fun setTextRateNow(resourceId: Int): AppRate {
+    fun setTextRateNow(resourceId: Int): AppRate = apply {
         options.textPositiveResId = resourceId
-        return this
     }
 
-    fun setTextRateNow(positiveText: String?): AppRate {
+    fun setTextRateNow(positiveText: String?): AppRate = apply {
         options.setPositiveText(positiveText)
-        return this
     }
 
-    fun setTextLater(resourceId: Int): AppRate {
+    fun setTextLater(resourceId: Int): AppRate = apply {
         options.textNeutralResId = resourceId
-        return this
     }
 
-    fun setTextLater(neutralText: String?): AppRate {
+    fun setTextLater(neutralText: String?): AppRate = apply {
         options.setNeutralText(neutralText)
-        return this
     }
 
-    fun setTextNever(resourceId: Int): AppRate {
+    fun setTextNever(resourceId: Int): AppRate = apply {
         options.textNegativeResId = resourceId
-        return this
     }
 
-    fun setTextNever(negativeText: String?): AppRate {
+    fun setTextNever(negativeText: String?): AppRate = apply {
         options.setNegativeText(negativeText)
-        return this
     }
 
-    fun setCancelable(cancelable: Boolean): AppRate {
+    fun setCancelable(cancelable: Boolean): AppRate = apply {
         options.cancelable = cancelable
-        return this
     }
 
-    fun setStoreType(appstore: StoreType): AppRate {
+    fun setStoreType(appstore: StoreType): AppRate = apply {
         options.storeType = appstore
-        return this
     }
 
     fun monitor() {
@@ -162,15 +140,15 @@ class AppRate private constructor(context: Context) {
     private val isOverRemindDate: Boolean
         get() = isOverDate(PreferenceHelper.getRemindInterval(context), remindInterval)
 
-    fun setDebug(isDebug: Boolean): AppRate {
+    fun setDebug(isDebug: Boolean): AppRate = apply {
         this.isDebug = isDebug
-        return this
     }
 
     companion object {
         private var singleton: AppRate? = null
+
         @JvmStatic
-        fun with(context: Context): AppRate? {
+        fun with(context: Context): AppRate {
             if (singleton == null) {
                 synchronized(AppRate::class.java) {
                     if (singleton == null) {
@@ -178,24 +156,28 @@ class AppRate private constructor(context: Context) {
                     }
                 }
             }
-            return singleton
+
+            return requireNotNull(singleton)
         }
 
         @JvmStatic
         fun showRateDialogIfMeetsConditions(activity: Activity): Boolean {
-            val isMeetsConditions = singleton!!.isDebug || singleton!!.shouldShowRateDialog()
-            if (isMeetsConditions) {
-                singleton!!.showRateDialog(activity)
+            val instance = requireNotNull(singleton) {
+                return false
             }
-            return isMeetsConditions
+
+            if (!instance.isDebug && !instance.shouldShowRateDialog()) {
+                return false
+            }
+
+            instance.showRateDialog(activity)
+
+            return true
         }
 
-        private fun isOverDate(targetDate: Long, threshold: Int): Boolean {
+        private fun isOverDate(targetDate: Long, threshold: Long): Boolean {
             return Date().time - targetDate >= threshold * 24 * 60 * 60 * 1000
         }
     }
 
-    init {
-        this.context = context.applicationContext
-    }
 }
