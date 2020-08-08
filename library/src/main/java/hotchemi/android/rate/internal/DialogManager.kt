@@ -1,12 +1,13 @@
 package hotchemi.android.rate.internal
 
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import hotchemi.android.rate.StoreType
 
 internal object DialogManager {
     fun create(context: Context, options: DialogOptions): Dialog {
-        return Utils.getDialogBuilder(context).apply {
+        return AlertDialog.Builder(context, Utils.dialogTheme).apply {
             setMessage(options.getMessageText(context))
 
             if (options.shouldShowTitle()) {
