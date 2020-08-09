@@ -2,182 +2,104 @@ package hotchemi.android.rate
 
 import android.app.Activity
 import android.content.Context
-import android.view.View
-import hotchemi.android.rate.internal.DialogManager
-import hotchemi.android.rate.internal.DialogOptions
-import hotchemi.android.rate.internal.PreferenceHelper
+import hotchemi.android.rate.internal.*
 import java.util.*
+import java.util.concurrent.TimeUnit
 
-class AppRate private constructor(context: Context) {
-    private val context: Context = context.applicationContext
-    private val options = DialogOptions()
-    private var installDate: Long = 10
-    private var launchTimes: Int = 10
-    private var remindInterval: Long = 1
-    var isDebug = false
-        private set
-
-    fun setLaunchTimes(launchTimes: Int): AppRate = apply {
-        this.launchTimes = launchTimes
-    }
-
-    fun setInstallDays(installDate: Long): AppRate = apply {
-        this.installDate = installDate
-    }
-
-    fun setRemindInterval(remindInterval: Long): AppRate = apply {
-        this.remindInterval = remindInterval
-    }
-
-    fun setShowLaterButton(isShowNeutralButton: Boolean): AppRate = apply {
-        options.setShowNeutralButton(isShowNeutralButton)
-    }
-
-    fun setShowNeverButton(isShowNeverButton: Boolean): AppRate = apply {
-        options.setShowNegativeButton(isShowNeverButton)
-    }
-
-    fun setShowTitle(isShowTitle: Boolean): AppRate = apply {
-        options.setShowTitle(isShowTitle)
-    }
-
-    fun clearAgreeShowDialog(): AppRate = apply {
-        PreferenceHelper.setAgreeShowDialog(context, true)
-    }
-
-    fun clearSettingsParam(): AppRate = apply {
-        PreferenceHelper.setAgreeShowDialog(context, true)
-        PreferenceHelper.clearSharedPreferences(context)
-    }
-
-    fun setAgreeShowDialog(clear: Boolean): AppRate = apply {
-        PreferenceHelper.setAgreeShowDialog(context, clear)
-    }
-
-    fun setView(view: View?): AppRate = apply {
-        options.view = view
-    }
-
-    fun setOnClickButtonListener(listener: OnClickButtonListener?): AppRate = apply {
-        options.setListener(listener)
-    }
-
-    fun setTitle(resourceId: Int): AppRate = apply {
-        options.titleResId = resourceId
-    }
-
-    fun setTitle(title: String?): AppRate = apply {
-        options.setTitleText(title)
-        return this
-    }
-
-    fun setMessage(resourceId: Int): AppRate = apply {
-        options.messageResId = resourceId
-    }
-
-    fun setMessage(message: String?): AppRate = apply {
-        options.setMessageText(message)
-    }
-
-    fun setTextRateNow(resourceId: Int): AppRate = apply {
-        options.textPositiveResId = resourceId
-    }
-
-    fun setTextRateNow(positiveText: String?): AppRate = apply {
-        options.setPositiveText(positiveText)
-    }
-
-    fun setTextLater(resourceId: Int): AppRate = apply {
-        options.textNeutralResId = resourceId
-    }
-
-    fun setTextLater(neutralText: String?): AppRate = apply {
-        options.setNeutralText(neutralText)
-    }
-
-    fun setTextNever(resourceId: Int): AppRate = apply {
-        options.textNegativeResId = resourceId
-    }
-
-    fun setTextNever(negativeText: String?): AppRate = apply {
-        options.setNegativeText(negativeText)
-    }
-
-    fun setCancelable(cancelable: Boolean): AppRate = apply {
-        options.cancelable = cancelable
-    }
-
-    fun setStoreType(appstore: StoreType): AppRate = apply {
-        options.storeType = appstore
-    }
-
-    fun monitor() {
-        if (PreferenceHelper.isFirstLaunch(context)) {
-            PreferenceHelper.setInstallDate(context)
+object AppRate {
+    fun initialize(context: Context, reviewType: ReviewType, debug: Boolean) {
+        if (_state != null) {
+            debugLog { "AppRate has already been initialized" }
+            return
         }
-        PreferenceHelper.setLaunchTimes(context, PreferenceHelper.getLaunchTimes(context) + 1)
+
+        val preferences = if (debug) {
+            MemorySharedPreferences()
+        } else {
+            PreferenceHelper.getPreferences(context)
+        }
+
+        synchronized(AppRate) {
+            if (_state != null) {
+                return
+            }
+
+            _state = AppRateState(preferences)
+            _option = AppRateOption(reviewType)
+        }
+
+        debugLog { "AppRate has been initialized (debug = ${debug})" }
     }
 
-    fun showRateDialog(activity: Activity) {
+    private var _state: AppRateState? = null
+    private var _option: AppRateOption? = null
+
+    val isInitialized: Boolean
+        get() = _state != null
+
+    val option: AppRateOption
+        get() = requireNotNull(_option) { "AppRate must be initialized first" }
+
+    val state: AppRateState
+        get() = requireNotNull(_state) { "AppRate must be initialized first" }
+
+    val shouldShowRateDialog: Boolean
+        get() = promoteContext != null
+
+    private val promoteContext: PromoteContext?
+        get() {
+            if (state.hasShownPromotionDialog) {
+                return null
+            }
+
+            val now = Date()
+
+            if (!option.disableLaunchCountPromotion &&
+                    state.launchTimes >= option.launchCountThreshold) {
+                return PromoteContext.LaunchCount
+            }
+
+            if (!option.disableElapsedTimeAfterInstallPromotion &&
+                    isOverDate(now, targetDate = state.installedDate, threshold = option.elapsedMillisAfterInstall, thresholdUnit = TimeUnit.MILLISECONDS)) {
+                return PromoteContext.ElapsedTimeAfterInstall
+            }
+
+            if (!option.disableRemindIntervalPromotion &&
+                    isOverDate(now, targetDate = state.remindSelectedDate, threshold = option.remindIntervalMillis, thresholdUnit = TimeUnit.MILLISECONDS)) {
+                return PromoteContext.ScheduledReminder
+            }
+
+            return null
+        }
+
+    fun markAsLaunched() {
+        if (state.installedDate == null) {
+            state.installedDate = Date()
+        }
+
+        state.launchTimes = state.launchTimes + 1
+    }
+
+    fun showDialogIfMeetsConditions(activity: Activity): Boolean {
+        if (!shouldShowRateDialog) {
+            return false
+        }
+
         if (!activity.isFinishing) {
-            DialogManager.create(activity, options).show()
-        }
-    }
-
-    fun shouldShowRateDialog(): Boolean {
-        return PreferenceHelper.getIsAgreeShowDialog(context) &&
-                isOverLaunchTimes &&
-                isOverInstallDate &&
-                isOverRemindDate
-    }
-
-    private val isOverLaunchTimes: Boolean
-        get() = PreferenceHelper.getLaunchTimes(context) >= launchTimes
-
-    private val isOverInstallDate: Boolean
-        get() = isOverDate(PreferenceHelper.getInstallDate(context), installDate)
-
-    private val isOverRemindDate: Boolean
-        get() = isOverDate(PreferenceHelper.getRemindInterval(context), remindInterval)
-
-    fun setDebug(isDebug: Boolean): AppRate = apply {
-        this.isDebug = isDebug
-    }
-
-    companion object {
-        private var singleton: AppRate? = null
-
-        @JvmStatic
-        fun with(context: Context): AppRate {
-            if (singleton == null) {
-                synchronized(AppRate::class.java) {
-                    if (singleton == null) {
-                        singleton = AppRate(context)
-                    }
-                }
-            }
-
-            return requireNotNull(singleton)
+            val factory = option.promotionDialogFactory
+                    ?: BuiltinPromotionDialogFactory(option = option.builtinDialogOption)
+            factory.create(activity, AppRateActionImpl(activity, state, option))
         }
 
-        @JvmStatic
-        fun showRateDialogIfMeetsConditions(activity: Activity): Boolean {
-            val instance = requireNotNull(singleton) {
-                return false
-            }
-
-            if (!instance.isDebug && !instance.shouldShowRateDialog()) {
-                return false
-            }
-
-            instance.showRateDialog(activity)
-
-            return true
-        }
-
-        private fun isOverDate(targetDate: Long, threshold: Long): Boolean {
-            return Date().time - targetDate >= threshold * 24 * 60 * 60 * 1000
-        }
+        return true
     }
 
+    @Suppress("SameParameterValue")
+    private fun isOverDate(base: Date, targetDate: Date?, threshold: Long, thresholdUnit: TimeUnit): Boolean {
+        if (targetDate == null) {
+            return false
+        }
+
+        return base.time - targetDate.time >= thresholdUnit.toMillis(threshold)
+    }
 }

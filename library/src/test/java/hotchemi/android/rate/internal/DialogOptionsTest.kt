@@ -3,7 +3,7 @@ package hotchemi.android.rate.internal
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import hotchemi.android.rate.StoreType
+import hotchemi.android.rate.ReviewType
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,7 +33,7 @@ class DialogOptionsTest {
     @Test
     fun `storeType`() {
         "GooglePlay by default".run {
-            assertThat(options.storeType).isEqualTo(StoreType.GooglePlay)
+            assertThat(options.reviewType).isEqualTo(ReviewType.GooglePlay)
         }
     }
 
